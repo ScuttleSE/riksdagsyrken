@@ -90,6 +90,13 @@ def load(terms):
     return {k: v for k, v in people.items() if v["terms"]}
 
 
+def load_ids():
+    if not CSV.exists():
+        return []
+    with CSV.open(encoding="utf-8-sig") as f:
+        return list({r["Id"] for r in csv.DictReader(f)})
+
+
 def riksdagen_url(p):
     slug = norm_name(f"{p['first']} {p['last']}")
     slug = unicodedata.normalize("NFKD", slug).encode("ascii", "ignore").decode()

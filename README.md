@@ -13,6 +13,7 @@ cd scraper
 python3 fetch_lists.py   # mandatperioder + ledamöter (ordinarie, ersättare, nya)
 python3 enrich.py        # Wikipedia-ingress + Wikidata (yrke P106, födelseår, kön, bild)
 python3 enrich_full.py   # hela artikeltexten för de som saknar yrke i ingressen
+python3 riksdagen_bilder.py  # porträtt från riksdagen (kräver person.csv)
 python3 build.py         # matchning mot riksdagsdata + klassificering -> web/static/data.json
 ```
 

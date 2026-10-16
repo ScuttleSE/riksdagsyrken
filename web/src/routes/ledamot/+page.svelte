@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import { base } from '$app/paths';
 	import { store, wikiUrl, NONE } from '$lib/data.svelte.js';
+	import Avatar from '$lib/Avatar.svelte';
 
 	const d = $derived(store.data);
 	const m = $derived(d.byId.get(page.url.searchParams.get('id') ?? ''));
@@ -18,13 +19,9 @@
 	<div class="card fade-in overflow-hidden">
 		<div class="h-24" style="background: linear-gradient(120deg, {p?.f ?? '#64748b'}, color-mix(in srgb, {p?.f ?? '#64748b'} 30%, transparent))"></div>
 		<div class="-mt-12 flex flex-col gap-5 px-6 pb-6 sm:flex-row sm:items-end">
-			{#if m.img}
-				<img src={m.img} alt={m.n} class="h-28 w-28 rounded-2xl border-4 border-[var(--bg)] object-cover shadow-xl" />
-			{:else}
-				<div class="grid h-28 w-28 place-items-center rounded-2xl border-4 border-[var(--bg)] text-3xl font-bold text-white shadow-xl" style:background={p?.f}>
-					{m.n.split(' ').map((s) => s[0]).slice(0, 2).join('')}
-				</div>
-			{/if}
+			{#key m.id}
+				<Avatar {m} color={p?.f ?? '#64748b'} size="h-28 w-28" text="text-3xl" rounded="rounded-2xl" extra="border-4 border-[var(--bg)] shadow-xl ring-0" />
+			{/key}
 			<div class="flex-1">
 				<h1 class="h-display text-3xl font-bold">{m.n}</h1>
 				<p class="text-muted">

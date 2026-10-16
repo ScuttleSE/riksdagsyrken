@@ -208,6 +208,8 @@ def main():
         print("Okända partier:", unknown_parties)
 
     rd_people = riksdagen.load(terms)
+    img_path = OUT / "riksdagen_bilder.json"
+    rd_images = json.loads(img_path.read_text()) if img_path.exists() else {}
     match_riksdagen(members, rd_people, people)
 
     out_members = []
@@ -248,7 +250,7 @@ def main():
             "q": qid,
             "b": wd.get("born") or rd.get("born"),
             "k": wd.get("gender") or rd.get("gender"),
-            "img": thumb(wd.get("image")),
+            "img": thumb(wd.get("image")) or (rd_images.get(rd["id"]) if rd else None),
             "y": profs,
             "h": main,
             "t": sorted(p["terms"], key=lambda t: t["t"]),
