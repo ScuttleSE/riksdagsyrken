@@ -1,0 +1,72 @@
+# Yrkesgrupper. Ordningen spelar roll: första gruppen vars mönster matchar vinner.
+# Mönstren är reguljära uttryck som testas mot yrket i gemener.
+# "ignorera" listar termer som inte är yrken (titlar, partinamn, skräp).
+
+ignorera:
+  - ^(invald|ledamot|fram|väg|jord|samhälls|budget|bror|ersättare|återigen|bland annat|politisk vilde|ordförande|vice ordförande|styrelseledamot|aktivist|statsman)$
+  - (partist|demokrat|moderaterna|centerpartiet|vänsterpartiet)$
+  - ^(greve|friherre|friherrinna)$
+  - sjöfartstidning|bohusläningen
+  - ^politiker
+  - ^(tidigare|ledamot av sveriges riksdag|riksdagspolitiker.*|union member|ålderspresident|statsrådsersättare)$
+  - ^(socialdemokratisk|högerpartistisk)$
+
+grupper:
+  - namn: Hemmafru (titeln "fru")
+    monster: ['^(fru|fröken)$']
+  - namn: Politiska uppdrag
+    monster:
+      - parlamentsledamot|regionpolitiker|oppositionsråd|kvinnosakspolitiker|kommunalråd|landstingsråd|borgarråd|regionråd|kommunalstämmo|landstingsordförande
+      - minister|statssekreterare|partisekreterare|partiordförande|partiledare|partiombudsman
+      - talman|utskottets|gruppledare|språkrör|politisk sekr|pol\. ?sekr|näringspolitisk|ordförande muf
+      - fullmäktig|riksgälds|bankofullmäktig|folkpartiets|ungdomspolitiker|sjukvårdspolitiker|kommunpolitiker|fn-delegat|överförmyndare
+  - namn: Facklig verksamhet & folkrörelse
+    monster:
+      - ombudsman|fackförening|fackförbund|förbundsordförande|förbundsombud|förbundssekreterare|förbundskassör|förbundsledare|förbundsjurist
+      - avdelningsordförande|^lo|lo:s|studieinstruktör|studiesekreterare|studieledare|nykterhet|skyddsombud|organisationssekreterare|organisationschef|folketshus|idrottsledare|generalsekreterare
+  - namn: Religion
+    monster: ['präst|pastor|predikant|kyrkoherde|komminister|prost|diakon|teolog|teol\.|kyrkvaktmästare|kantor']
+  - namn: Juridik & rättsväsende
+    monster: ['jurist|advokat|åklagare|domare|rådman|hovrätt|jur\.|juris|kronofogde|tingsnotarie|beredningsråd|häradsdomare|länsassessor|borgmästare']
+  - namn: Polis, militär & försvar
+    monster: ['polis|kriminal|officer|militär|^kapten|major|överste|löjtnant|försvarsdirektör|sjöofficer']
+  - namn: Vård & omsorg
+    monster:
+      - läkare|sköterska|sjukskötare|barnmorska|apotekare|farmaceut|receptarie|sjukgymnast|vårdbiträde|vårdare|skötare|sjukvård
+      - psykolog|barnskötare|barnomsorg|stödassistent|fysiolog|diabetolog|virolog|habilitering
+  - namn: Utbildning & pedagogik
+    monster:
+      - lärare|adjunkt|lektor|rektor|^rektör|skolerektör|pedagog|studierektor|skolledare|skoldirektör|skolchef|skolkanslist|utbildningschef|gymnastikdirektör|yrkesvals|syo
+  - namn: Forskning & akademi
+    monster:
+      - professor|prof\.|docent|forskare|vetare|historiker|sociolog|biolog|astronom|meteorolog|kemist|statistiker|kulturgeograf|kriminolog|akademiker|nationalekonom|ekonomhistoriker
+      - doktor|dr$|licentiat|fil\. ?lic|fil\. ?dr
+  - namn: Akademisk examen (utan yrke)
+    monster: ['kandidat|fil\. ?kand|fil\. ?mag|pol\. ?mag|politices magister|filosofie magister|ekonomie magister|student|examen']
+  - namn: Socialt arbete & arbetsförmedling
+    monster: ['socionom|kurator|social|arbetsförmedl|barnavård|familjerätt|hyresgäst|konsumentvägledare|föräldraråd|arbetsvård|personalkonsulent']
+  - namn: Media, kultur & kommunikation
+    monster:
+      - journalist|redaktör|författare|skribent|publicist|förlag|förläggare|information|kommunikatör|kommunikation|programledare|producent|tidningsman|ledarskribent|tv-|radio|bloggare|podd|debattör|opinionsbildare|kommentator|översättare
+      - regissör|krönikör|poet|organist|skådespelare|artist|sångare|musik|dansare|fotograf|konstnär|konsthantverk|scenmagiker|kulturchef|kulturanalytiker|bibliotekarie|antikvarie|pressekreterare|spex|boktryckare|typograf
+  - namn: Jordbruk, skog & fiske
+    monster: ['lantbrukare|bonde|jordbruk|hemmansägare|skog|lantmästare|agronom|godsägare|småbrukare|trädgård|fiskare|fiskeri|jägmästare|kronojägare|hönseri|lantarbetare']
+  - namn: Ekonomi, bank & finans
+    monster: ['ekonom|kamrer|bank|revisor|kassör|finans|skattedirektör|fondsekreterare|försäkring|ekonomiassistent|budget']
+  - namn: Företagande & näringsliv
+    monster:
+      - företag|^direktör|verkställande direktör|marknadsdirektör|skivbolagsdirektör|planeringsdirektör|disponent|diponent|fabrikör|köpman|handlare|affärs|entreprenör|konsult|konsulent|näringsliv|industriman|åkeriägare|lobbyist|säljare|försäljning|marknads|inköpare|verksamhetsutvecklare|platschef|restaurangchef|strateg|frisörmästare|målarmästare|skräddarmästare|elinstallatör
+  - namn: Teknik & ingenjörsyrken
+    monster: ['ingenjör|tekniker|arkitekt|lantmät|mätning|uppmätning|programmerare|systemanalytiker|it-|energianalytiker|elmästare|vägmästare']
+  - namn: Transport & kommunikationer
+    monster: ['lokförare|chaufför|förare|konduktör|postiljon|brevbärare|lots|styrman|pilot|flygledare|järnväg|postexpeditör|transport|telearbetare|telefonist']
+  - namn: Industri, bygg & hantverk
+    monster:
+      - arbetare|arbeterska|svarvare|svetsare|plåtslagare|elektriker|snickare|verktygsmakare|maskinist|montör|konditor|skräddare|segelmakare|murare|verkmästare|arbetsledare|apparatskötare|kranmaskinist|frisör|hantverk
+  - namn: Offentlig förvaltning & diplomati
+    monster:
+      - ämbetsman|tjänsteman|diplomat|ambassadör|landshövding|generaldirektör|departements|utrednings|byrå|inspektör|inspektor|fögderi|länsarbetsdirektör|kommunsekreterare|planerings|stadskassör|tullmästare|kommunalkamrer|kanslichef|förvaltare|förvaltning|förvaltningschef|föreståndare|handläggare|direktör
+  - namn: Kontor, service & administration
+    monster: ['kontorist|assistent|sekreterare|receptionist|expeditör|serverings|barbiträde|vaktmästare|instruktör|administratör|personal|projektledare|chef|ledare|tjänst']
+  - namn: Idrott
+    monster: ['skidåkare|längdåkare|fotboll|idrottare|racerförare']

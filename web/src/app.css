@@ -1,0 +1,206 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	--font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+	--font-display: 'Fraunces', Georgia, serif;
+	--color-accent: var(--accent);
+	--color-muted: var(--muted);
+}
+
+:root {
+	--bg: #f6f7fb;
+	--fg: #0f172a;
+	--muted: #64748b;
+	--card: rgba(255, 255, 255, 0.75);
+	--border: rgba(15, 23, 42, 0.08);
+	--accent: #7c3aed;
+	--accent2: #db2777;
+	color-scheme: light;
+}
+.dark {
+	--bg: #0b0f1a;
+	--fg: #e2e8f0;
+	--muted: #94a3b8;
+	--card: rgba(30, 41, 59, 0.45);
+	--border: rgba(148, 163, 184, 0.12);
+	--accent: #a78bfa;
+	--accent2: #f472b6;
+	color-scheme: dark;
+}
+
+html {
+	background: var(--bg);
+	color: var(--fg);
+}
+body {
+	min-height: 100vh;
+	background:
+		radial-gradient(1200px 600px at 10% -10%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 60%),
+		radial-gradient(900px 500px at 100% 0%, color-mix(in srgb, var(--accent2) 14%, transparent), transparent 60%);
+	background-attachment: fixed;
+}
+
+@layer components {
+	.card {
+		background: var(--card);
+		border: 1px solid var(--border);
+		border-radius: 1.25rem;
+		backdrop-filter: blur(14px);
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 30px -12px rgba(0, 0, 0, 0.18);
+	}
+	.label {
+		font-size: 0.7rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--muted);
+	}
+	.h-display {
+		font-family: var(--font-display);
+		letter-spacing: -0.02em;
+	}
+	.grad-text {
+		background: linear-gradient(90deg, var(--accent), var(--accent2));
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+	}
+	.seg {
+		display: inline-flex;
+		padding: 3px;
+		border-radius: 999px;
+		border: 1px solid var(--border);
+		background: color-mix(in srgb, var(--fg) 4%, transparent);
+	}
+	.seg button {
+		padding: 0.35rem 0.9rem;
+		border-radius: 999px;
+		font-size: 0.85rem;
+		color: var(--muted);
+		transition: all 0.15s;
+		white-space: nowrap;
+	}
+	.seg button.on {
+		background: linear-gradient(90deg, var(--accent), var(--accent2));
+		color: white;
+		box-shadow: 0 4px 14px -4px color-mix(in srgb, var(--accent) 60%, transparent);
+	}
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.25rem 0.6rem;
+		border-radius: 999px;
+		font-size: 0.78rem;
+		font-weight: 600;
+		border: 1px solid var(--border);
+		color: var(--muted);
+		transition: all 0.15s;
+	}
+	.chip:hover {
+		color: var(--fg);
+	}
+	.chip.on {
+		color: var(--fg);
+		border-color: var(--c, var(--accent));
+		background: color-mix(in srgb, var(--c, var(--accent)) 18%, transparent);
+	}
+	.dot {
+		width: 0.55rem;
+		height: 0.55rem;
+		border-radius: 999px;
+		display: inline-block;
+		flex: none;
+	}
+	.input {
+		width: 100%;
+		padding: 0.8rem 1rem 0.8rem 2.75rem;
+		border-radius: 1rem;
+		border: 1px solid var(--border);
+		background: var(--card);
+		outline: none;
+		font-size: 1rem;
+		transition: box-shadow 0.15s, border-color 0.15s;
+	}
+	.input:focus {
+		border-color: var(--accent);
+		box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
+	}
+	.select {
+		padding: 0.45rem 0.75rem;
+		border-radius: 0.75rem;
+		border: 1px solid var(--border);
+		background: var(--card);
+		font-size: 0.875rem;
+	}
+	.bar-bg {
+		background: color-mix(in srgb, var(--fg) 6%, transparent);
+		border-radius: 999px;
+		overflow: hidden;
+	}
+}
+
+.range-wrap {
+	position: relative;
+	height: 1.5rem;
+}
+.range-wrap::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	height: 6px;
+	transform: translateY(-50%);
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--fg) 10%, transparent);
+}
+.range-fill {
+	position: absolute;
+	top: 50%;
+	height: 6px;
+	transform: translateY(-50%);
+	border-radius: 999px;
+	background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+.range-wrap input {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	appearance: none;
+	background: none;
+	pointer-events: none;
+}
+.range-wrap input::-webkit-slider-thumb {
+	appearance: none;
+	pointer-events: auto;
+	width: 18px;
+	height: 18px;
+	border-radius: 999px;
+	background: white;
+	border: 3px solid var(--accent);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	cursor: grab;
+}
+.range-wrap input::-moz-range-thumb {
+	pointer-events: auto;
+	width: 14px;
+	height: 14px;
+	border-radius: 999px;
+	background: white;
+	border: 3px solid var(--accent);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+	cursor: grab;
+}
+
+.fade-in {
+	animation: fade 0.35s ease both;
+}
+@keyframes fade {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+}

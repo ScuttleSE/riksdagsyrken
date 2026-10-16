@@ -1,0 +1,5 @@
+# Manuella yrkesuppgifter. Nyckel = ledamotens id (Wikipedia-artikelns titel,
+# eller "Namn#röd" för personer utan artikel). Värdet är en lista med yrken.
+# Exempel:
+# "Olof Palme": [ämbetsman]
+{}
