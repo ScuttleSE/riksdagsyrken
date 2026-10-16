@@ -8,6 +8,7 @@ from urllib.parse import quote
 import yaml
 
 from extract import from_extract, from_fulltext, from_list_column
+import riksdagen
 
 HERE = Path(__file__).parent
 OUT = HERE / "out"
@@ -23,8 +24,9 @@ PARTIES = [
     ("V", "Vänsterpartiet", "#DA291C", r"^v$|vänsterparti"),
     ("MP", "Miljöpartiet", "#83CF39", r"^mp$|miljöparti"),
     ("SD", "Sverigedemokraterna", "#DDDD00", r"^sd$|sverigedemokrat"),
-    ("NYD", "Ny demokrati", "#FFD700", r"ny demokrati"),
-    ("-", "Partilös", "#9CA3AF", r"oberoende|partilös"),
+    ("NYD", "Ny demokrati", "#FFD700", r"^nyd$|ny demokrati"),
+    ("-", "Partilös", "#9CA3AF", r"^-$|oberoende|partilös"),
+    ("?", "Okänt parti", "#6B7280", r"^\?$"),
 ]
 
 
@@ -69,6 +71,98 @@ def thumb(image):
     return f"https://commons.wikimedia.org/wiki/Special:FilePath/{quote(image.replace(' ', '_'))}?width=240"
 
 
+def match_riksdagen(members, rd_people, wd_people):
+    """Kopplar riksdagens personposter till våra ledamöter och lägger till de som saknas."""
+    index = defaultdict(set)
+    for rid, r in rd_people.items():
+        for k in riksdagen.name_keys(r["first"], r["last"]):
+            index[k].add(rid)
+
+    pairs = []
+    for key, p in members.items():
+        words = riksdagen.norm_name(p["name"]).split()
+        keys = {" ".join(words)}
+        if len(words) >= 2:
+            keys |= riksdagen.name_keys(" ".join(words[:-1]), words[-1])
+        page = p["page"] or {}
+        born = wd_people.get(page.get("qid"), {}).get("born")
+        ours = {t["t"] for t in p["terms"]}
+        for rid in set().union(*(index.get(k, set()) for k in keys)):
+            r = rd_people[rid]
+            if born and r["born"] and abs(born - r["born"]) > 1:
+                continue
+            overlap = len(ours & set(r["terms"]))
+            birth_ok = bool(born and r["born"])
+            if not overlap and not birth_ok:
+                continue
+            pairs.append((overlap + (5 if birth_ok else 0), key, rid))
+
+    # Bästa par först; tvetydiga (lika poäng för samma person) hoppas över.
+    pairs.sort(reverse=True)
+    best = defaultdict(list)
+    for score, key, rid in pairs:
+        best[key].append((score, rid))
+    used_k, used_r, matched = set(), set(), 0
+    for score, key, rid in pairs:
+        if key in used_k or rid in used_r:
+            continue
+        if sum(1 for s, r in best[key] if s == score and r not in used_r) > 1:
+            continue
+        used_k.add(key)
+        used_r.add(rid)
+        members[key]["rd"] = rd_people[rid]
+        matched += 1
+        have = {t["t"] for t in members[key]["terms"]}
+        last = members[key]["terms"][-1]
+        for ti, kind in rd_people[rid]["terms"].items():
+            if ti not in have:
+                members[key]["terms"].append({"t": ti, "p": last["p"], "vk": last["vk"], "r": kind})
+
+    # Andra varvet: namnbyten (t.ex. "Britt Bohlin Olsson" / "Britt Bohlin"). Samma förnamn,
+    # överlappande mandatperioder och antingen samma födelseår eller gemensamt efternamnsled.
+    for rid, r in rd_people.items():
+        if rid in used_r:
+            continue
+        rwords = riksdagen.norm_name(f"{r['first']} {r['last']}").split()
+        cands = []
+        for key, p in members.items():
+            if key in used_k:
+                continue
+            words = riksdagen.norm_name(p["name"]).split()
+            if not words or words[0] != rwords[0]:
+                continue
+            born = wd_people.get((p["page"] or {}).get("qid"), {}).get("born")
+            if born and r["born"] and abs(born - r["born"]) > 1:
+                continue
+            if not ({t["t"] for t in p["terms"]} & set(r["terms"])):
+                continue
+            if (born and born == r["born"]) or set(words[1:]) & set(rwords[1:]):
+                cands.append(key)
+        if len(cands) == 1:
+            key = cands[0]
+            used_k.add(key)
+            used_r.add(rid)
+            members[key]["rd"] = r
+            matched += 1
+
+    added = 0
+    for rid, r in rd_people.items():
+        if rid in used_r:
+            continue
+        code = party_code(r["party"]) if r["party"] else "?"
+        name = f"{r['first']} {r['last']}".strip()
+        members[f"riksdagen:{rid}"] = {
+            "id": f"riksdagen:{rid}", "name": name, "page": None, "list_yrken": [], "rd": r,
+            "terms": [{"t": ti, "p": code, "vk": r["valkrets"], "r": kind}
+                      for ti, kind in sorted(r["terms"].items())],
+        }
+        added += 1
+    print(f"Riksdagen: {len(rd_people)} personer, {matched} matchade, {added} tillagda")
+    (OUT / "riksdagen_tillagda.txt").write_text(
+        "\n".join(f"{r['first']} {r['last']} ({r['born']}, {r['party']})"
+                  for rid, r in rd_people.items() if rid not in used_r))
+
+
 def main():
     terms = json.loads((OUT / "terms.json").read_text())
     enr = json.loads((OUT / "enriched.json").read_text())
@@ -100,13 +194,17 @@ def main():
     if unknown_parties:
         print("Okända partier:", unknown_parties)
 
+    rd_people = riksdagen.load(terms)
+    match_riksdagen(members, rd_people, people)
+
     out_members = []
     group_raw = defaultdict(Counter)
     for key, p in members.items():
         page = p["page"] or {}
         qid = page.get("qid")
         wd = people.get(qid, {}) if qid else {}
-        cands = []
+        rd = p.get("rd") or {}
+        cands = [(r, "riksdagen") for r in rd.get("titles", [])]
         for txt in p["list_yrken"]:
             cands += [(r, "lista") for r in from_list_column(txt)]
         cands += [(r, "wikipedia") for r in from_extract(page.get("extract", ""))]
@@ -135,13 +233,14 @@ def main():
             "n": p["name"],
             "w": page.get("title"),
             "q": qid,
-            "b": wd.get("born"),
-            "k": wd.get("gender"),
+            "b": wd.get("born") or rd.get("born"),
+            "k": wd.get("gender") or rd.get("gender"),
             "img": thumb(wd.get("image")),
             "y": profs,
             "h": main,
-            "t": p["terms"],
+            "t": sorted(p["terms"], key=lambda t: t["t"]),
             "i": intro,
+            "rd": riksdagen.riksdagen_url(rd) if rd else None,
         })
 
     out_members.sort(key=lambda m: m["n"])

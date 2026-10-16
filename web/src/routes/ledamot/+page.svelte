@@ -5,7 +5,7 @@
 
 	const d = $derived(store.data);
 	const m = $derived(d.byId.get(page.url.searchParams.get('id') ?? ''));
-	const sources = { lista: 'Riksdagslistan', wikipedia: 'Wikipedia', wikidata: 'Wikidata', manuell: 'Manuell' };
+	const sources = { riksdagen: 'Riksdagen', lista: 'Riksdagslistan', wikipedia: 'Wikipedia', wikidata: 'Wikidata', manuell: 'Manuell' };
 	const p = $derived(m ? d.partyMap[m.t.at(-1).p] : null);
 </script>
 
@@ -31,9 +31,14 @@
 					{p?.n ?? 'Okänt parti'}{#if m.b} · född {m.b}{/if}{#if m.k} · {m.k}{/if}
 				</p>
 			</div>
-			{#if wikiUrl(m)}
-				<a href={wikiUrl(m)} target="_blank" rel="noopener" class="rounded-full border border-[var(--border)] px-4 py-2 text-sm font-medium hover:text-accent">Wikipedia ↗</a>
-			{/if}
+			<div class="flex gap-2">
+				{#if m.rd}
+					<a href={m.rd} target="_blank" rel="noopener" class="rounded-full border border-[var(--border)] px-4 py-2 text-sm font-medium hover:text-accent">Riksdagen ↗</a>
+				{/if}
+				{#if wikiUrl(m)}
+					<a href={wikiUrl(m)} target="_blank" rel="noopener" class="rounded-full border border-[var(--border)] px-4 py-2 text-sm font-medium hover:text-accent">Wikipedia ↗</a>
+				{/if}
+			</div>
 		</div>
 	</div>
 
@@ -42,19 +47,19 @@
 			<h2 class="label mb-3">Yrken</h2>
 			{#if m.y.length}
 				<div class="space-y-2">
-					{#each m.y as y}
+					{#each m.y as y, i}
 						<div class="flex flex-wrap items-center gap-3">
 							<span class="text-lg font-semibold capitalize">{y.y}</span>
 							<a href="{base}/yrken/?g={encodeURIComponent(y.g)}" class="chip on" style:--c={d.groupColor[y.g]}>
 								<span class="dot" style:background={d.groupColor[y.g]}></span>{y.g}
 							</a>
-							{#if y.g === m.h}<span class="text-xs text-accent">huvudyrke</span>{/if}
+							{#if i === m.y.findIndex((x) => x.g === m.h)}<span class="text-xs text-accent">huvudyrke</span>{/if}
 							<span class="ml-auto text-xs text-muted">källa: {sources[y.s]}</span>
 						</div>
 					{/each}
 				</div>
 			{:else}
-				<p class="text-muted">{NONE} – Wikipedia anger inget yrke utöver politiker.</p>
+				<p class="text-muted">{NONE} – varken riksdagen eller Wikipedia anger något yrke utöver politiker.</p>
 			{/if}
 			{#if m.i}
 				<h2 class="label mb-2 mt-6">Ur Wikipedia</h2>

@@ -13,11 +13,16 @@ cd scraper
 python3 fetch_lists.py   # mandatperioder + ledamöter (ordinarie, ersättare, nya)
 python3 enrich.py        # Wikipedia-ingress + Wikidata (yrke P106, födelseår, kön, bild)
 python3 enrich_full.py   # hela artikeltexten för de som saknar yrke i ingressen
-python3 build.py         # klassificering -> web/static/data.json
+python3 build.py         # matchning mot riksdagsdata + klassificering -> web/static/data.json
 ```
+
+`build.py` använder också `person.csv` från [Riksdagens öppna data](https://www.riksdagen.se/sv/dokument-och-lagar/riksdagens-oppna-data/ledamoter/)
+om filen ligger i projektroten (den versionshanteras inte). Personerna matchas på namn, födelseår och mandatperioder;
+personer som bara finns hos riksdagen läggs till och listas i `scraper/out/riksdagen_tillagda.txt`.
 
 Yrken hämtas i prioritetsordning från:
 
+1. Riksdagens titel för ledamoten (`person.csv`)
 1. Yrkeskolumnen i riksdagslistorna (finns för 1971–1988)
 2. Artikelns första mening ("… är en svensk **lärare** och politiker …")
 3. Wikidata *yrke* (P106), utom "politiker"

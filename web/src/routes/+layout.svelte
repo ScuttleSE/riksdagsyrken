@@ -75,6 +75,7 @@
 
 <footer class="mx-auto max-w-7xl px-4 pb-10 pt-4 text-xs text-muted sm:px-6">
 	Källa: <a class="underline" href="https://sv.wikipedia.org/wiki/Listor_%C3%B6ver_ledam%C3%B6ter_av_Sveriges_riksdag">Wikipedia – Listor över ledamöter av Sveriges riksdag</a>
-	och Wikidata (CC BY-SA). Yrken är hämtade ur listornas yrkeskolumn (1971–1988), artiklarnas ingress och Wikidata, och grupperade automatiskt – fel kan förekomma.
+	och Wikidata (CC BY-SA) samt <a class="underline" href="https://www.riksdagen.se/sv/dokument-och-lagar/riksdagens-oppna-data/">Riksdagens öppna data</a>.
+	Yrken är hämtade ur riksdagens personuppgifter, listornas yrkeskolumn (1971–1988), Wikipedia och Wikidata, och grupperade automatiskt – fel kan förekomma.
 	{#if store.data}Data hämtad {store.data.generated}.{/if}
 </footer>

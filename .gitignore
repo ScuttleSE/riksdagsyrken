@@ -1,3 +1,4 @@
 scraper/cache/
 scraper/out/
 __pycache__/
+person.csv
