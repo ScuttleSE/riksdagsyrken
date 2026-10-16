@@ -80,10 +80,12 @@ def match_riksdagen(members, rd_people, wd_people):
 
     pairs = []
     for key, p in members.items():
-        words = riksdagen.norm_name(p["name"]).split()
-        keys = {" ".join(words)}
-        if len(words) >= 2:
-            keys |= riksdagen.name_keys(" ".join(words[:-1]), words[-1])
+        keys = set()
+        for alias in {p["name"], *p.get("aliases", ())}:
+            words = riksdagen.norm_name(alias).split()
+            keys.add(" ".join(words))
+            if len(words) >= 2:
+                keys |= riksdagen.name_keys(" ".join(words[:-1]), words[-1])
         page = p["page"] or {}
         born = wd_people.get(page.get("qid"), {}).get("born")
         ours = {t["t"] for t in p["terms"]}
@@ -180,9 +182,10 @@ def main():
             page = pages.get(m["page"]) if m["page"] else None
             key = page["title"] if page else f"{m['name']}#röd"
             p = members.setdefault(key, {
-                "id": key, "name": (page["title"] if page else m["name"]), "page": page,
-                "list_yrken": [], "terms": [],
+                "id": key, "name": m["name"], "page": page,
+                "list_yrken": [], "terms": [], "aliases": set(),
             })
+            p["aliases"].add(m["name"])
             p["name"] = re.sub(r"\s*\(.*\)$", "", p["name"])
             code = party_code(m["party"])
             if code == "?":
