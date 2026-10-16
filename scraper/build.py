@@ -247,6 +247,7 @@ def main():
         print("Okända partier:", unknown_parties)
 
     rd_people = riksdagen.load(terms)
+    personlista = riksdagen.load_personlista() if riksdagen.PERSONLISTA.exists() else {}
     img_path = OUT / "riksdagen_bilder.json"
     rd_images = json.loads(img_path.read_text()) if img_path.exists() else {}
     match_riksdagen(members, rd_people, people)
@@ -278,6 +279,18 @@ def main():
                 continue
             profs.append({"y": raw, "g": g, "s": src})
             group_raw[g][raw] += 1
+        if not profs and rd:
+            # Reserv: riksdagens biografi (anställningar och yrkesexamina)
+            for raw in riksdagen.bio_professions(personlista.get(rd["id"])):
+                raw = normalize_raw(raw)
+                g = classify(raw)
+                if raw in seen or not g or g == OTHER:
+                    continue
+                seen.add(raw)
+                profs.append({"y": raw, "g": g, "s": "riksdagen"})
+                group_raw[g][raw] += 1
+                if len(profs) == 3:
+                    break
         main = next((x["g"] for x in profs if x["g"] != "Politiska uppdrag"), None) \
             or (profs[0]["g"] if profs else None)
         intro = next((ln for ln in page.get("extract", "").split("\n")
@@ -287,7 +300,7 @@ def main():
             "n": p["name"],
             "w": page.get("title"),
             "q": qid,
-            "b": wd.get("born") or rd.get("born"),
+            "b": rd.get("born") or wd.get("born"),
             "k": wd.get("gender") or rd.get("gender"),
             "img": thumb(wd.get("image")) or (rd_images.get(rd["id"]) if rd else None),
             "y": profs,

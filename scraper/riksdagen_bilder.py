@@ -11,18 +11,12 @@ from common import SESSION
 import riksdagen
 
 OUT = Path(__file__).parent / "out"
-LIST = OUT / "riksdagen_personlista.json"
-URL = "https://data.riksdagen.se/personlista/?rdlstatus=samtliga&utformat=json"
 PLACEHOLDER_MAX_BYTES = 3000
 
 
 def main():
-    if not LIST.exists():
-        r = SESSION.get(URL, timeout=300)
-        r.raise_for_status()
-        LIST.write_bytes(r.content)
-    persons = json.loads(LIST.read_text())["personlista"]["person"]
-    urls = {p["intressent_id"]: p.get("bild_url_192") for p in persons if p.get("bild_url_192")}
+    persons = riksdagen.load_personlista()
+    urls = {i: p.get("bild_url_192") for i, p in persons.items() if p.get("bild_url_192")}
 
     ids = set(riksdagen.load_ids())
     todo = {i: u for i, u in urls.items() if i in ids}

@@ -27,7 +27,8 @@ Yrken hämtas i prioritetsordning från:
 1. Yrkeskolumnen i riksdagslistorna (finns för 1971–1988)
 2. Artikelns första mening ("… är en svensk **lärare** och politiker …")
 3. Wikidata *yrke* (P106), utom "politiker"
-4. Fraser i artikeltexten ("arbetade som …", "till yrket …")
+4. Fraser i artikeltexten ("har arbetat som …", "studerade till …", "till yrket …")
+5. Som reserv, för den som saknar allt annat: riksdagens biografi (senaste anställningarna och yrkesexamina)
 
 Grupperingen styrs av `scraper/yrkesgrupper.yaml` (reguljära uttryck, första träff vinner).
 Manuella rättelser läggs i `scraper/overrides.yaml` (yrken), `scraper/matchningar.yaml` (kopplingar till riksdagsdatan),

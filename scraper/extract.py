@@ -46,25 +46,35 @@ def from_list_column(text):
 
 
 WORK = re.compile(
-    r"\b(?:arbetade\s+(?:hon|han\s+)?(?:bland annat\s+|tidigare\s+|först\s+|länge\s+)?som|"
-    r"anställd\s+som|verksam\s+som|yrkesverksam\s+som|tjänstgjorde\s+som|"
-    r"utbildade\s+sig\s+till|utbildad\s+till|utbildad|examen\s+som|"
-    r"till\s+yrket|till\s+professionen|var\s+(?:han|hon)\s+(?:verksam\s+som|anställd\s+som))\s+"
-    r"((?:[a-zåäöé-]+)(?:\s+och\s+[a-zåäöé-]+)?)")
+    r"\b(?:(?:har\s+|hade\s+)?(?:även\s+|också\s+)?(?:tidigare\s+)?"
+    r"(?:arbetat|arbetade|arbeta|jobbat|jobbade|jobba|verkat|verkade)\s+"
+    r"(?:(?:hon|han|bland annat|bl\.a\.|tidigare|först|länge|i många år|under många år|bland annat)\s+)*som|"
+    r"anställd\s+som|anställdes\s+som|verksam\s+som|yrkesverksam\s+som|tjänstgjorde\s+som|tjänstgjort\s+som|"
+    r"studerade\s+till|utbildade\s+sig\s+till|utbildat\s+sig\s+till|utbildad\s+till|utbildad|examen\s+som|"
+    r"till\s+yrket|till\s+professionen|bakgrund\s+som|var\s+(?:han|hon)\s+(?:verksam\s+som|anställd\s+som))\s+"
+    r"((?:[a-zåäöé-]+)(?:,\s+[a-zåäöé-]+)*(?:\s+och\s+[a-zåäöé-]+)?)")
 PROF_SUFFIX = re.compile(
     r"(are|ör|man|log|ist|ent|iker|ekonom|nom|jurist|läkare|sköterska|biträde|lärare|chef|"
     r"redaktör|ingenjör|tekniker|sekreterare|assistent|bonde|präst|pastor|officer|polis|"
     r"inspektör|rektor|adjunkt|lektor|kurator|advokat|socionom|agronom|författare|journalist|"
     r"konsult|kamrer|kassör|elektriker|snickare|ombudsman|arbetare|arbeterska|tjänsteman|"
-    r"vetare|forskare|kantor|frisör|egenföretagare|företagare|professor|docent|ambassadör)$")
+    r"vetare|forskare|kantor|frisör|egenföretagare|företagare|professor|docent|ambassadör|"
+    r"handläggare|samordnare|utredare|säljare|vårdare|skötare|pedagog|terapeut|"
+    r"montör|kock|bagare|chaufför|förare|soldat|brandman|väktare|revisor|controller)$")
+NOT_PROF = re.compile(r"^(senare|tidigare|sedan|ledamot|ersättare|suppleant|ordförande|talesperson|gruppledare|partiledare|"
+                      r"språkrör|kommunalråd|regionråd|politiker|vice)$")
 
 
 def from_fulltext(text):
     out = []
     for m in WORK.finditer(text or ""):
-        for w in re.split(r"\s+och\s+", m.group(1)):
+        words = re.split(r",\s+|\s+och\s+", m.group(1))
+        for w in words:
             w = w.strip().lower()
-            if len(w) >= 4 and PROF_SUFFIX.search(w) and w not in POLITICAL and not w.endswith("partist"):
+            # "SFI- och högstadielärare": den avkortade första delen hoppas över
+            if w.endswith("-") or len(w) < 4 or NOT_PROF.match(w):
+                continue
+            if PROF_SUFFIX.search(w) and w not in POLITICAL and not w.endswith("partist"):
                 out.append(w)
     return list(dict.fromkeys(out))
 
