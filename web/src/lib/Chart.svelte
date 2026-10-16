@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { store } from './data.svelte.js';
 
-	let { option, height = '360px', onclick = null } = $props();
+	let { option, height = '360px', onclick = null, events = {} } = $props();
 	let el;
 	let chart = $state(null);
 	let echarts;
@@ -15,6 +15,7 @@
 			echarts = mod;
 			chart = echarts.init(el, null, { renderer: 'canvas' });
 			if (onclick) chart.on('click', onclick);
+			for (const [name, fn] of Object.entries(events)) chart.on(name, fn);
 			ro = new ResizeObserver(() => chart?.resize());
 			ro.observe(el);
 		});

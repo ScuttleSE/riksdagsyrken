@@ -59,6 +59,15 @@
 		]
 	});
 
+	// Inte $state: tooltip-formattern läser värdet vid varje musrörelse,
+	// och diagrammet ska inte ritas om när det ändras.
+	let hoveredGroup = null;
+	const areaEvents = {
+		mouseover: (p) => (hoveredGroup = p.seriesName),
+		mouseout: () => (hoveredGroup = null),
+		globalout: () => (hoveredGroup = null)
+	};
+
 	const areaOption = $derived.by(() => {
 		const groups = [...d.groups, NONE].filter((g) => showNone || g !== NONE);
 		const { rows, totals } = perTerm;
@@ -68,14 +77,23 @@
 			tooltip: {
 				trigger: 'axis',
 				order: 'valueDesc',
-				formatter: (ps) =>
-					`<b>${ps[0].axisValue}</b><br>` +
-					ps
-						.filter((p) => p.value > 0)
-						.sort((a, b) => b.value - a.value)
-						.slice(0, 12)
-						.map((p) => `${p.marker}${p.seriesName}: <b>${share ? p.value.toFixed(1) + ' %' : p.value}</b>`)
-						.join('<br>')
+				formatter: (ps) => {
+					const rows = ps.filter((p) => p.value > 0).sort((a, b) => b.value - a.value);
+					const shown = rows.slice(0, 12);
+					const hov = rows.find((p) => p.seriesName === hoveredGroup);
+					if (hov && !shown.includes(hov)) shown.push(hov);
+					return (
+						`<b>${ps[0].axisValue}</b><br>` +
+						shown
+							.map((p) => {
+								const v = share ? p.value.toFixed(1) + ' %' : p.value;
+								return p.seriesName === hoveredGroup
+									? `<div style="font-weight:700;font-size:13px;margin:2px 0">${p.marker}${p.seriesName}: ${v}</div>`
+									: `<div style="opacity:${hoveredGroup ? 0.6 : 1}">${p.marker}${p.seriesName}: <b>${v}</b></div>`;
+							})
+							.join('')
+					);
+				}
 			},
 			xAxis: { type: 'category', boundaryGap: false, data: labels, axisLabel: { rotate: 40, fontSize: 10 } },
 			yAxis: { type: 'value', max: share && store.mode === 'huvud' ? 100 : null, axisLabel: { formatter: share ? '{value} %' : '{value}' } },
@@ -85,6 +103,7 @@
 				stack: 'a',
 				smooth: 0.3,
 				symbol: 'none',
+				triggerLineEvent: true,
 				lineStyle: { width: 0 },
 				areaStyle: { opacity: 0.85, color: d.groupColor[g] },
 				itemStyle: { color: d.groupColor[g] },
@@ -203,7 +222,7 @@
 			<button class:on={!share} onclick={() => (share = false)}>Antal</button>
 		</div>
 	</div>
-	<Chart option={areaOption} height="460px" />
+	<Chart option={areaOption} height="460px" events={areaEvents} />
 </section>
 
 <section class="card p-5">
