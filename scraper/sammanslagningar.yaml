@@ -1,0 +1,5 @@
+# Personer som förekommer under olika namnformer i listorna och ska räknas som en.
+# Nyckel = id som ska slås ihop, värde = id som behålls.
+"Anton E. Fågelsbo#röd": "Anton Fågelsbo#röd"
+"Sven Åkerfeldt#röd": "Sven Eric Åkerfeldt#röd"
+"Sven Erik Nordin#röd": "Sven-Erik Nordin#röd"

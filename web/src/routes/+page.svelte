@@ -14,8 +14,7 @@
 	const known = $derived(sel.filter((m) => m.y.length));
 	const countsShown = $derived(counts.filter(([g]) => showNone || g !== NONE));
 	const women = $derived(sel.filter((m) => m.k === 'kvinna').length);
-	const withGender = $derived(sel.filter((m) => m.k).length);
-
+	
 	const topRaw = $derived.by(() => {
 		const c = new Map();
 		for (const m of sel) {
@@ -174,7 +173,7 @@
 	{#each [
 		['Ledamöter', sel.length.toLocaleString('sv-SE'), `under ${store.termLabel}`],
 		['Vanligaste yrkesgrupp', counts.find(([g]) => g !== NONE)?.[0] ?? '–', `${counts.find(([g]) => g !== NONE)?.[1] ?? 0} ledamöter`],
-		['Andel kvinnor', pct(women, withGender), `${women} av ${withGender} med känt kön`],
+		['Andel kvinnor', pct(women, sel.length), `${women.toLocaleString('sv-SE')} kvinnor av ${sel.length.toLocaleString('sv-SE')} ledamöter`],
 		['Med känt yrke', pct(known.length, sel.length), `${sel.length - known.length} saknar uppgift`]
 	] as [label, value, sub], i}
 		<div class="card fade-in p-5" style:animation-delay="{i * 60}ms">
@@ -227,6 +226,6 @@
 
 <section class="card p-5">
 	<h2 class="text-lg font-semibold">Andel kvinnor per yrkesgrupp</h2>
-	<p class="mb-3 text-xs text-muted">Grupper med minst 5 ledamöter med känt kön (Wikidata).</p>
+	<p class="mb-3 text-xs text-muted">Yrkesgrupper med minst 5 ledamöter.</p>
 	<Chart option={womenOption} height="440px" />
 </section>

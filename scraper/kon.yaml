@@ -1,0 +1,5 @@
+# Kön för förnamn som inte kan härledas ur övriga ledamöter.
+# Används bara när varken Wikidata eller riksdagen anger kön.
+# Ett förnamn kan även anges med fullt namn för att peka ut en viss person.
+kvinna: [Alma, Ella, Ethel, Svea, Tyra, Ingalill, Mariya]
+man: [Alfred, Anton, Dick, Gunde, Timothy]

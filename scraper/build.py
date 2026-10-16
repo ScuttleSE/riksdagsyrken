@@ -175,6 +175,39 @@ def match_riksdagen(members, rd_people, wd_people):
                   for rid, r in rd_people.items() if rid not in used_r))
 
 
+def first_names(name):
+    first = riksdagen.norm_name(name).split()[0] if name.strip() else ""
+    return [first, first.split("-")[0]]
+
+
+def fill_gender(members):
+    """Fyller i saknat kön utifrån förnamn: entydiga namn bland övriga ledamöter, annars kon.yaml."""
+    by_name = defaultdict(Counter)
+    for m in members:
+        if m["k"]:
+            by_name[first_names(m["n"])[0]][m["k"]] += 1
+    cfg = yaml.safe_load((HERE / "kon.yaml").read_text()) if (HERE / "kon.yaml").exists() else {}
+    manual = {riksdagen.norm_name(n): k for k, names in (cfg or {}).items() for n in names}
+    missing = []
+    for m in members:
+        if m["k"]:
+            continue
+        g = manual.get(riksdagen.norm_name(m["n"]))
+        for fn in first_names(m["n"]):
+            if g:
+                break
+            c = by_name.get(fn)
+            if c and len(c) == 1:
+                g = next(iter(c))
+            else:
+                g = manual.get(fn)
+        m["k"] = g
+        if not g:
+            missing.append(m["n"])
+    if missing:
+        print("Kön saknas fortfarande (lägg till i kon.yaml):", missing)
+
+
 def main():
     terms = json.loads((OUT / "terms.json").read_text())
     enr = json.loads((OUT / "enriched.json").read_text())
@@ -185,12 +218,16 @@ def main():
     overrides = yaml.safe_load(overrides_path.read_text()) if overrides_path.exists() else {}
     overrides = overrides or {}
 
+    merge_path = HERE / "sammanslagningar.yaml"
+    merges = (yaml.safe_load(merge_path.read_text()) if merge_path.exists() else None) or {}
+
     members = {}
     unknown_parties = Counter()
     for ti, t in enumerate(terms):
         for m in t["members"]:
             page = pages.get(m["page"]) if m["page"] else None
             key = page["title"] if page else f"{m['name']}#röd"
+            key = merges.get(key, key)
             p = members.setdefault(key, {
                 "id": key, "name": m["name"], "page": page,
                 "list_yrken": [], "terms": [], "aliases": set(),
@@ -200,6 +237,8 @@ def main():
             code = party_code(m["party"])
             if code == "?":
                 unknown_parties[m["party"]] += 1
+            if any(x["t"] == ti for x in p["terms"]):
+                continue
             p["terms"].append({"t": ti, "p": code, "vk": m["valkrets"],
                                "r": "o" if m["role"] == "ordinarie" else "e"})
             if m["yrke_lista"]:
@@ -257,6 +296,8 @@ def main():
             "i": intro,
             "rd": riksdagen.riksdagen_url(rd) if rd else None,
         })
+
+    fill_gender(out_members)
 
     no_party = [m["n"] for m in out_members if any(t["p"] == "?" for t in m["t"])]
     if no_party:

@@ -130,6 +130,8 @@ def parse_term(title, start, end):
                 if not link or not link[1]:
                     continue
                 page, name = link
+                if not page and re.match(r"(?i)vakan", name):
+                    continue  # tom plats, inte en person
                 party = val(r, party_cols)
                 vk = re.sub(r",?\s*plats\s*\d+$", "", val(r, vk_cols))
                 yrke = val(r, yrke_cols)

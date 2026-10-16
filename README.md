@@ -30,7 +30,8 @@ Yrken hämtas i prioritetsordning från:
 4. Fraser i artikeltexten ("arbetade som …", "till yrket …")
 
 Grupperingen styrs av `scraper/yrkesgrupper.yaml` (reguljära uttryck, första träff vinner).
-Manuella rättelser läggs i `scraper/overrides.yaml`, och manuella kopplingar till riksdagsdatan i `scraper/matchningar.yaml`. Personer utan yrkesuppgift listas i `scraper/out/utan_yrke.txt`.
+Manuella rättelser läggs i `scraper/overrides.yaml` (yrken), `scraper/matchningar.yaml` (kopplingar till riksdagsdatan),
+`scraper/sammanslagningar.yaml` (samma person under olika namnformer) och `scraper/kon.yaml` (kön för ovanliga förnamn). Personer utan yrkesuppgift listas i `scraper/out/utan_yrke.txt`.
 
 **Huvudyrke** = första yrke som inte är ett politiskt uppdrag. **Alla yrken** = ledamoten räknas i varje grupp.
 
