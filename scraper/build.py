@@ -26,7 +26,6 @@ PARTIES = [
     ("SD", "Sverigedemokraterna", "#DDDD00", r"^sd$|sverigedemokrat"),
     ("NYD", "Ny demokrati", "#FFD700", r"^nyd$|ny demokrati"),
     ("-", "Partilös", "#9CA3AF", r"^-$|oberoende|partilös"),
-    ("?", "Okänt parti", "#6B7280", r"^\?$"),
 ]
 
 
@@ -256,6 +255,10 @@ def main():
             "i": intro,
             "rd": riksdagen.riksdagen_url(rd) if rd else None,
         })
+
+    no_party = [m["n"] for m in out_members if any(t["p"] == "?" for t in m["t"])]
+    if no_party:
+        raise SystemExit(f"Ledamöter utan känt parti (lägg till i matchningar.yaml eller rätta källan): {no_party}")
 
     out_members.sort(key=lambda m: m["n"])
     group_names = [g for g, _ in GROUPS] + [OTHER]

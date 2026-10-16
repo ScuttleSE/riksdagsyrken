@@ -18,7 +18,7 @@
 	<span class="min-w-0 flex-1">
 		<span class="block truncate text-sm font-medium group-hover:text-accent">{m.n}</span>
 		<span class="block truncate text-xs text-muted">
-			<span class="font-semibold" style:color={p?.f}>{p?.c ?? '?'}</span>
+			<span class="font-semibold" style:color={p?.f}>{p?.c ?? ''}</span>
 			· {termSpan(m, d.terms)}
 			{#if m.y.length}· {m.y.filter((y) => !highlight || y.g === highlight).concat(m.y.filter((y) => highlight && y.g !== highlight)).map((y) => y.y).slice(0, 3).join(', ')}{/if}
 		</span>
