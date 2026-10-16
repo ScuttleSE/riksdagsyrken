@@ -105,6 +105,17 @@ def match_riksdagen(members, rd_people, wd_people):
     for score, key, rid in pairs:
         best[key].append((score, rid))
     used_k, used_r, matched = set(), set(), 0
+    manual_path = HERE / "matchningar.yaml"
+    manual = (yaml.safe_load(manual_path.read_text()) if manual_path.exists() else None) or {}
+    for rid, key in manual.items():
+        rid = str(rid)
+        if rid in rd_people and key in members:
+            used_k.add(key)
+            used_r.add(rid)
+            members[key]["rd"] = rd_people[rid]
+            matched += 1
+        else:
+            print(f"Manuell matchning hittades inte: {rid} -> {key}")
     for score, key, rid in pairs:
         if key in used_k or rid in used_r:
             continue

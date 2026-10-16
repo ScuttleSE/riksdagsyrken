@@ -1,0 +1,4 @@
+# Manuella kopplingar mellan riksdagens person-id (från person.csv) och ledamotens id här
+# (Wikipedia-artikelns titel, eller "Namn#röd" för personer utan artikel).
+# Används när den automatiska matchningen missar, t.ex. vid olika stavning.
+"0489579494909": "Erik Jansson#röd"   # Erik Janson (S), Värmlands län 1985–1988
